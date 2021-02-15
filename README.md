@@ -1,5 +1,5 @@
 ### separator
-a small program that create a pair dataset with face images and classifiy them in two same and diffrent folders
+a small script that create a pair dataset with face images and classifiy them in two same and diffrent folders
 
 ![python](https://img.shields.io/badge/python-v3.8-blue)
 ![build](https://img.shields.io/badge/build-passing-success)
@@ -16,7 +16,7 @@ a small program that create a pair dataset with face images and classifiy them i
 - directory that contain index and others folder (Image name in index folder is id of face which may have another image in others folder with that id.)
 
 <h4 id="usage">Usage</h4>
-you can run the program with bellow command 
+you can run the script with bellow command 
 
 <code>python separator.py  -s  "source_path" -d  "destination_path" </code>
 
