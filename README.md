@@ -17,10 +17,10 @@ a small program that create a pair dataset with face images and classifiy them i
 
 <h4 id="usage">Usage</h4>
 you can run the program with bellow command 
+
 <code>python separator.py  -s  "source_path" -d  "destination_path" </code>
 
 source_path is directory containing the index faces folder and other faces folder
-
 destination_path is directory that script create same and different faces folders in it
 
 for more information you can run <code>python separator.py  -h </code>
