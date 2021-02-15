@@ -26,6 +26,6 @@ destination_path is directory that script create same and different faces folder
 for more information you can run <code>python separator.py  -h </code>
 
 <h4 id="license">License</h4>
-separator is licensed under the MIT license
+separator is licensed under the <a href="https://opensource.org/licenses/MIT">MIT</a> license
 
 
