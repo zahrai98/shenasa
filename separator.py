@@ -3,6 +3,7 @@ from pathlib import Path
 import shutil
 import sys
 import getopt
+import random
 
 
 DATASET_ALL_IMAGES_FOLDER = "index"
@@ -21,31 +22,20 @@ def make_path(first_part, second_part):
     return result_path
 
 
-def copy_others_to_diffrent(index_directory, others_directory,
-                            diffrent_directory, image_name,
-                            silmilar_images_list):
-    for image in os.listdir(others_directory):
-        folder_name_reverse = image.replace('.jpg', '_') + image_name.replace('.jpg', '')
-        if (not Path(make_path(diffrent_directory, folder_name_reverse)).exists() 
-                and image not in silmilar_images_list):
-            destination_folder_name = image_name.replace('.jpg', '_') + image.replace('.jpg', '')
-            print("otherds diff",destination_folder_name)
-            destination = make_directory(make_path(diffrent_directory, destination_folder_name))
-            shutil.copy(make_path(index_directory,image_name), destination)
-            shutil.copy(make_path(others_directory,image), destination)
-
     
-def copy_index_to_diffrent(index_directory, diffrent_directory, image_name):
-    for image in os.listdir(index_directory):
+def copy_index_to_diffrent(index_directory, diffrent_directory,
+                         image_name, random_images):
+    created_folders_count = 0
+    for image in random_images:
         folder_name_reverse = image.replace('.jpg', '_') + image_name.replace('.jpg', '')
-        print(Path(make_path(diffrent_directory, folder_name_reverse)).exists())
         if (not Path(make_path(diffrent_directory, folder_name_reverse)).exists()  
                 and image != image_name):    
             destination_folder_name = image_name.replace('.jpg', '_') + image.replace('.jpg', '')
-            print("index diff",destination_folder_name)
             destination = make_directory(make_path(diffrent_directory, destination_folder_name))
             shutil.copy(make_path(index_directory,image_name), destination)
             shutil.copy(make_path(index_directory,image), destination)
+            created_folders_count += 1
+    return created_folders_count
 
 
 def copy_to_same(index_directory, others_directory,
@@ -53,11 +43,27 @@ def copy_to_same(index_directory, others_directory,
                  silmilar_images_list):
     for image in silmilar_images_list:
         destination_folder_name = image.replace('.jpg', '')
-        print("same",destination_folder_name)
         destination = make_directory(make_path(same_directory, destination_folder_name))
         shutil.copy(make_path(index_directory,image_name), destination)
         shutil.copy(make_path(others_directory,image),destination)
 
+
+def make_diffrents_folder(same_folders_count, diffrent_images_name,
+                         index_directory, diffrent_directory):
+    diffrent_image_count = int(same_folders_count/len(diffrent_images_name))
+    remind_diffrent_images = same_folders_count + 1
+    if diffrent_image_count != 0 :
+        for image_name in diffrent_images_name:
+            random_images = random.sample(os.listdir(index_directory), diffrent_image_count)
+            remind_diffrent_images -= copy_index_to_diffrent(index_directory,
+                     diffrent_directory, image_name, random_images)
+    if diffrent_image_count == 0 or remind_diffrent_images != 0:
+        for image_name in diffrent_images_name:
+            random_images = random.sample(os.listdir(index_directory), 1)
+            remind_diffrent_images -= copy_index_to_diffrent(index_directory,
+                     diffrent_directory, image_name, random_images)
+            if remind_diffrent_images <= 0:
+                break
 
 
 # Loop in index folder and find similar images in others folder
@@ -67,9 +73,10 @@ def separate_images(source_path, destination_path):
     same_directory = make_directory(make_path(destination_path, DATASET_SAME_FOLDER))
     diffrent_directory = make_directory(make_path(destination_path, DATASET_DIFFERENT_FOLDER))
 
+    diffrent_images_name = []
+
     for image_name in os.listdir(index_directory):
         image_id = image_name.replace('.jpg', '')
-        print(image_id)
         similars_in_others = [
             other_image_name 
             for other_image_name in os.listdir(others_directory) 
@@ -78,12 +85,12 @@ def separate_images(source_path, destination_path):
         if len(similars_in_others):
             copy_to_same(index_directory, others_directory,
                 same_directory, image_name,
-                similars_in_others)       
-        copy_index_to_diffrent(index_directory, diffrent_directory,
-            image_name)
-        copy_others_to_diffrent(index_directory, others_directory,
-            diffrent_directory, image_name,
-            similars_in_others)
+                similars_in_others)
+        else:
+            diffrent_images_name.append(image_name)       
+    same_folders_count = len(os.listdir(same_directory))
+    make_diffrents_folder(same_folders_count, diffrent_images_name,
+                        index_directory, diffrent_directory)
     return "Done"
 
 def check_exeist(source_path):
