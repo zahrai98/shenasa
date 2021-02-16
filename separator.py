@@ -30,12 +30,13 @@ def copy_index_to_diffrent(index_directory, diffrent_directory,
 def make_diffrent_folder(same_folders_count, diffrent_images_name,
                          index_directory, diffrent_directory):
     diffrent_image_count = int(same_folders_count/len(diffrent_images_name))
-    remind_diffrent_images = same_folders_count 
+    remind_diffrent_images = same_folders_count + 1
     if diffrent_image_count != 0 :
         for image_name in diffrent_images_name:
             random_images = random.sample(os.listdir(index_directory), diffrent_image_count)
             remind_diffrent_images -= copy_index_to_diffrent(index_directory,
                      diffrent_directory, image_name, random_images)
+            print(remind_diffrent_images)
     if diffrent_image_count == 0 or remind_diffrent_images != 0:
         for image_name in diffrent_images_name:
             if remind_diffrent_images <= 0:
@@ -43,6 +44,7 @@ def make_diffrent_folder(same_folders_count, diffrent_images_name,
             random_images = random.sample(os.listdir(index_directory), 1)
             remind_diffrent_images -= copy_index_to_diffrent(index_directory,
                      diffrent_directory, image_name, random_images)
+            print(remind_diffrent_images)
 
 # Loop in index folder and find similar images in others folder
 def separate_images(source_path, destination_path):
@@ -67,8 +69,7 @@ def separate_images(source_path, destination_path):
                 shutil.copy(os.path.join(others_directory,other_image_name), destination)
         if not similar_image:
             diffrent_images_name.append(image_name)  
-    same_folders_count = len(os.listdir(others_directory))     
-    make_diffrent_folder(same_folders_count, diffrent_images_name,
+    make_diffrent_folder(len(os.listdir(others_directory)), diffrent_images_name,
                         index_directory, diffrent_directory)
 
 def check_exeist(source_path):
@@ -78,29 +79,22 @@ def check_exeist(source_path):
     return result
 
 def parse_argument():
-    source_path = ''
-    destination_path = ''
+    source_path, destination_path = None, None
     parser = argparse.ArgumentParser()
-    parser.add_argument("SourcePath",
-                        help="source path that contain index and others")
+    parser.add_argument("SourcePath", help="source path that contain index and others")
     parser.add_argument("DestinationPath",
                         help="destination path that same and different will create")
     args = parser.parse_args()
     if check_exeist(args.SourcePath):
-        source_path = args.SourcePath
-        destination_path = args.DestinationPath
+        source_path, destination_path = args.SourcePath, args.DestinationPath
     else:
-        print("Index and others folder does not exist \nor")
+        print("Index or others folder does not exist or")
         print("You have not entered the quotation mark for paths")
-        print("you must enter commad like bellow:")
-        print("separator.py 'source_path' 'destination_path'")
+        print("command:separator.py 'source_path' 'destination_path'")
     return source_path, destination_path
 
 
 if __name__ == "__main__":
     source_path, destination_path = parse_argument()
     if source_path and destination_path:
-        try:
-            separate_images(source_path,destination_path)
-        except:
-            print("information is in a wrong format")
+        separate_images(source_path, destination_path)
