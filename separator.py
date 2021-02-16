@@ -12,46 +12,26 @@ DATASET_DIFFERENT_FOLDER = "different"
 DATASET_SAME_FOLDER = "same"
 
 
-def make_directory(directory_name):
-    directory_name.mkdir(parents=True, exist_ok=True)
-    return directory_name
-
-
-def make_path(first_part, second_part):
-    result_path = Path(first_part) / Path(second_part)
-    return result_path
-
-
-    
 def copy_index_to_diffrent(index_directory, diffrent_directory,
                          image_name, random_images):
     created_folders_count = 0
     for image in random_images:
         folder_name_reverse = image.replace('.jpg', '_') + image_name.replace('.jpg', '')
-        if (not Path(make_path(diffrent_directory, folder_name_reverse)).exists()  
+        if (not Path(os.path.join(diffrent_directory, folder_name_reverse)).exists()  
                 and image != image_name):    
             destination_folder_name = image_name.replace('.jpg', '_') + image.replace('.jpg', '')
-            destination = make_directory(make_path(diffrent_directory, destination_folder_name))
-            shutil.copy(make_path(index_directory,image_name), destination)
-            shutil.copy(make_path(index_directory,image), destination)
+            destination = os.path.join(diffrent_directory, destination_folder_name)
+            Path(destination).mkdir(parents=True, exist_ok=True)
+            shutil.copy(os.path.join(index_directory, image_name), destination)
+            shutil.copy(os.path.join(index_directory, image), destination)
             created_folders_count += 1
     return created_folders_count
 
 
-def copy_to_same(index_directory, others_directory,
-                same_directory, image_name,
-                 silmilar_images_list):
-    for image in silmilar_images_list:
-        destination_folder_name = image.replace('.jpg', '')
-        destination = make_directory(make_path(same_directory, destination_folder_name))
-        shutil.copy(make_path(index_directory,image_name), destination)
-        shutil.copy(make_path(others_directory,image),destination)
-
-
-def make_diffrents_folder(same_folders_count, diffrent_images_name,
+def make_diffrent_folder(same_folders_count, diffrent_images_name,
                          index_directory, diffrent_directory):
     diffrent_image_count = int(same_folders_count/len(diffrent_images_name))
-    remind_diffrent_images = same_folders_count + 1
+    remind_diffrent_images = same_folders_count 
     if diffrent_image_count != 0 :
         for image_name in diffrent_images_name:
             random_images = random.sample(os.listdir(index_directory), diffrent_image_count)
@@ -59,43 +39,44 @@ def make_diffrents_folder(same_folders_count, diffrent_images_name,
                      diffrent_directory, image_name, random_images)
     if diffrent_image_count == 0 or remind_diffrent_images != 0:
         for image_name in diffrent_images_name:
+            if remind_diffrent_images <= 0:
+                break
             random_images = random.sample(os.listdir(index_directory), 1)
             remind_diffrent_images -= copy_index_to_diffrent(index_directory,
                      diffrent_directory, image_name, random_images)
-            if remind_diffrent_images <= 0:
-                break
 
 
 # Loop in index folder and find similar images in others folder
 def separate_images(source_path, destination_path):
-    index_directory = make_path(source_path, DATASET_ALL_IMAGES_FOLDER)
-    others_directory = make_path(source_path, DATASET_SOME_IMAGES_FOLDER)
-    same_directory = make_directory(make_path(destination_path, DATASET_SAME_FOLDER))
-    diffrent_directory = make_directory(make_path(destination_path, DATASET_DIFFERENT_FOLDER))
+    index_directory = os.path.join(source_path, DATASET_ALL_IMAGES_FOLDER)
+    others_directory = os.path.join(source_path, DATASET_SOME_IMAGES_FOLDER)
+    same_directory = os.path.join(destination_path, DATASET_SAME_FOLDER)
+    Path(same_directory).mkdir(parents=True, exist_ok=True)
+    diffrent_directory = os.path.join(destination_path, DATASET_DIFFERENT_FOLDER)
+    Path(diffrent_directory).mkdir(parents=True, exist_ok=True)
 
     diffrent_images_name = []
-
     for image_name in os.listdir(index_directory):
+        similar_image = False
         image_id = image_name.replace('.jpg', '')
-        similars_in_others = [
-            other_image_name 
-            for other_image_name in os.listdir(others_directory) 
-            if other_image_name.startswith(image_id + '_')
-            ]
-        if len(similars_in_others):
-            copy_to_same(index_directory, others_directory,
-                same_directory, image_name,
-                similars_in_others)
-        else:
-            diffrent_images_name.append(image_name)       
-    same_folders_count = len(os.listdir(same_directory))
-    make_diffrents_folder(same_folders_count, diffrent_images_name,
+        for other_image_name in os.listdir(others_directory):
+            if other_image_name.startswith(image_id + '_'):
+                similar_image = True
+                destination_folder_name = other_image_name.replace('.jpg', '')
+                destination = os.path.join(same_directory, destination_folder_name)
+                Path(destination).mkdir(parents=True, exist_ok=True)
+                shutil.copy(os.path.join(index_directory,image_name), destination)
+                shutil.copy(os.path.join(others_directory,other_image_name), destination)
+        if not similar_image:
+            diffrent_images_name.append(image_name)  
+    same_folders_count = len(os.listdir(others_directory))     
+    make_diffrent_folder(same_folders_count, diffrent_images_name,
                         index_directory, diffrent_directory)
     return "Done"
 
 def check_exeist(source_path):
-    first_path = make_path(source_path, DATASET_ALL_IMAGES_FOLDER)
-    second_path = make_path(source_path, DATASET_ALL_IMAGES_FOLDER)
+    first_path = os.path.join(source_path, DATASET_ALL_IMAGES_FOLDER)
+    second_path = os.path.join(source_path, DATASET_ALL_IMAGES_FOLDER)
     result = (Path(first_path).exists() and Path(second_path).exists())
     return result
 
@@ -129,7 +110,7 @@ def main(argv):
     else:
         result = "path is wrong"
     print(result)
-        
+
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])
