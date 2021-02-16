@@ -1,8 +1,6 @@
 import os 
 from pathlib import Path
 import shutil
-import sys
-import getopt
 import random
 import argparse
 
