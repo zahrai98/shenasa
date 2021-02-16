@@ -36,7 +36,6 @@ def make_diffrent_folder(same_folders_count, diffrent_images_name,
             random_images = random.sample(os.listdir(index_directory), diffrent_image_count)
             remind_diffrent_images -= copy_index_to_diffrent(index_directory,
                      diffrent_directory, image_name, random_images)
-            print(remind_diffrent_images)
     if diffrent_image_count == 0 or remind_diffrent_images != 0:
         for image_name in diffrent_images_name:
             if remind_diffrent_images <= 0:
@@ -44,7 +43,6 @@ def make_diffrent_folder(same_folders_count, diffrent_images_name,
             random_images = random.sample(os.listdir(index_directory), 1)
             remind_diffrent_images -= copy_index_to_diffrent(index_directory,
                      diffrent_directory, image_name, random_images)
-            print(remind_diffrent_images)
 
 # Loop in index folder and find similar images in others folder
 def separate_images(source_path, destination_path):
