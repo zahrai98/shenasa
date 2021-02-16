@@ -4,6 +4,7 @@ import shutil
 import sys
 import getopt
 import random
+import argparse
 
 
 DATASET_ALL_IMAGES_FOLDER = "index"
@@ -45,7 +46,6 @@ def make_diffrent_folder(same_folders_count, diffrent_images_name,
             remind_diffrent_images -= copy_index_to_diffrent(index_directory,
                      diffrent_directory, image_name, random_images)
 
-
 # Loop in index folder and find similar images in others folder
 def separate_images(source_path, destination_path):
     index_directory = os.path.join(source_path, DATASET_ALL_IMAGES_FOLDER)
@@ -72,45 +72,37 @@ def separate_images(source_path, destination_path):
     same_folders_count = len(os.listdir(others_directory))     
     make_diffrent_folder(same_folders_count, diffrent_images_name,
                         index_directory, diffrent_directory)
-    return "Done"
 
 def check_exeist(source_path):
     first_path = os.path.join(source_path, DATASET_ALL_IMAGES_FOLDER)
-    second_path = os.path.join(source_path, DATASET_ALL_IMAGES_FOLDER)
+    second_path = os.path.join(source_path, DATASET_SOME_IMAGES_FOLDER)
     result = (Path(first_path).exists() and Path(second_path).exists())
     return result
 
-
-def main(argv):
+def parse_argument():
     source_path = ''
     destination_path = ''
-    try:
-       opts, args = getopt.getopt(argv, "hs:d:", ["spath=", "dpath="])
-    except getopt.GetoptError:
-        print ('separator.py -s "source_path" -d "destination_path" \n or')
-        print('separator.py --spath "source_path" -dpath "destination_path"')
-        sys.exit(2)
-    if args :
-        print ('separator.py -h')
-        sys.exit()
-    for opt, arg in opts:
-       if opt == '-h':
-          print ('separator.py -s "source_path" -d "destination_path" \n or')
-          print('separator.py --spath "source_path" -dpath "destination_path"')
-          sys.exit()
-       elif opt in ("-s", "--spath"):
-          source_path = arg
-       elif opt in ("-d", "--dpath"):
-          destination_path = arg
-    if source_path !='' and destination_path != '' and check_exeist(source_path):
-        print('source path  is ', source_path)
-        print('destination path is ', destination_path)
-        print('please wait')
-        result = separate_images(source_path,destination_path)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("SourcePath",
+                        help="source path that contain index and others")
+    parser.add_argument("DestinationPath",
+                        help="destination path that same and different will create")
+    args = parser.parse_args()
+    if check_exeist(args.SourcePath):
+        source_path = args.SourcePath
+        destination_path = args.DestinationPath
     else:
-        result = "path is wrong"
-    print(result)
+        print("Index and others folder does not exist \nor")
+        print("You have not entered the quotation mark for paths")
+        print("you must enter commad like bellow:")
+        print("separator.py 'source_path' 'destination_path'")
+    return source_path, destination_path
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    source_path, destination_path = parse_argument()
+    if source_path and destination_path:
+        try:
+            separate_images(source_path,destination_path)
+        except:
+            print("information is in a wrong format")
